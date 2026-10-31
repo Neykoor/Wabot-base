@@ -1,115 +1,198 @@
-# WaBot - Base de bot de WhatsApp en Go
+WaBot - Base de bot de WhatsApp en Go
 
-Bot de WhatsApp en Go con [whatsmeow](https://github.com/tulir/whatsmeow), vinculado por código de emparejamiento (sin QR).
+Bot de WhatsApp desarrollado en Go utilizando "whatsmeow" (https://github.com/tulir/whatsmeow). Incluye vinculación mediante código de emparejamiento, sin necesidad de QR.
 
-## Estructura
+Estructura del proyecto
 
-| Archivo | Función |
-|---|---|
-| `main.go` | Conexión y vinculación por código |
-| `bot.go` | Eventos, despacho de comandos, `Reply` y `Send` |
-| `commands.go` | Comandos de ejemplo y registro |
-| `config.go` | Configuración por variables de entorno |
-| `go.mod` | Módulo de Go |
+Archivo| Función
+"main.go"| Conexión y vinculación por código
+"bot.go"| Eventos, comandos, Reply y Send
+"commands.go"| Comandos de ejemplo y registro
+"config.go"| Configuración mediante variables de entorno
+"go.mod"| Dependencias del proyecto
+"go.sum"| Versiones verificadas de dependencias
 
-## Instalación en Termux
+Instalación en Termux
 
-### 1. Preparar Termux
+1. Preparar Termux
 
-```
-pkg update && pkg upgrade -y
-pkg install -y golang git clang make tmux
-```
+Actualizar los paquetes:
 
-### 2. Descomprimir el proyecto
+pkg update
 
-Copia `wabot-base.zip` a tu almacenamiento y descomprímelo:
+pkg upgrade -y
 
-```
-termux-setup-storage
-pkg install -y unzip
-cp ~/storage/downloads/wabot-base.zip ~
-unzip wabot-base.zip
-cd wabot
-```
+Instalar las herramientas necesarias:
 
-### 3. Descargar dependencias
+pkg install golang
 
-```
+pkg install git
+
+pkg install clang
+
+pkg install make
+
+pkg install tmux
+
+2. Descargar el proyecto desde GitHub
+
+Ir al directorio principal:
+
+cd ~
+
+Clonar el repositorio:
+
+git clone https://github.com/Neykoor/Wabot-base.git wabot
+
+Entrar en la carpeta:
+
+cd ~/wabot
+
+3. Preparar las dependencias
+
+Habilitar CGO:
+
 export CGO_ENABLED=1
+
+Configurar Clang:
+
 export CC=clang
+
+Descargar y organizar las dependencias:
+
 go mod tidy
-```
 
-La primera compilación de `go-sqlite3` tarda unos minutos. Es normal.
+4. Compilar el bot
 
-### 4. Compilar
-
-```
 go build -o wabot .
-```
 
-### 5. Ejecutar y vincular
+5. Iniciar el bot
 
-```
 ./wabot
-```
 
-La primera vez te pide el número del bot con código de país, sin `+` ni espacios (ejemplo: `521234567890`). Luego muestra un código de 8 caracteres. En el teléfono del bot:
-
-1. WhatsApp > Dispositivos vinculados > Vincular dispositivo
-2. Elige **Vincular con el número de teléfono**
-3. Escribe el código mostrado en Termux
-
-Cuando aparezca `Vinculado correctamente` ya queda lista la sesión en `session.db`.
-
-### 6. Mantenerlo activo en segundo plano
-
-```
-termux-wake-lock
-tmux new -s bot
-./wabot
-```
-
-Para salir sin cerrar el bot: `Ctrl+B` y luego `D`. Para volver: `tmux attach -t bot`.
-
-## Variables de entorno opcionales
-
-| Variable | Por defecto | Descripción |
-|---|---|---|
-| `BOT_PHONE` | (pregunta) | Número para vincular sin prompt |
-| `BOT_PREFIX` | `!` | Prefijo de comandos |
-| `BOT_NAME` | `WaBot` | Nombre en el menú |
-| `BOT_SESSION_DB` | `session.db` | Archivo de sesión |
-| `BOT_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARN`, `ERROR` |
+La primera vez solicitará el número de teléfono con código de país, sin espacios ni signo "+".
 
 Ejemplo:
 
-```
+521234567890
+
+Después aparecerá un código de emparejamiento de 8 caracteres.
+
+En WhatsApp:
+
+1. Abrir Dispositivos vinculados.
+2. Seleccionar Vincular dispositivo.
+3. Elegir Vincular con número de teléfono.
+4. Introducir el código mostrado en Termux.
+
+Al finalizar aparecerá el mensaje de vinculación correcta y se guardará la sesión en "session.db".
+
+Mantener el bot activo
+
+Activar el bloqueo de suspensión:
+
+termux-wake-lock
+
+Crear una sesión de TMUX:
+
+tmux new -s bot
+
+Iniciar el bot:
+
+cd ~/wabot
+
+./wabot
+
+Para salir sin cerrar el bot:
+
+"CTRL + B" y después "D".
+
+Para volver a la sesión:
+
+tmux attach -t bot
+
+Actualizar el bot desde GitHub
+
+Entrar en la carpeta:
+
+cd ~/wabot
+
+Descargar los últimos cambios:
+
+git pull
+
+Actualizar dependencias:
+
+go mod tidy
+
+Compilar nuevamente:
+
+go build -o wabot .
+
+Iniciar el bot:
+
+./wabot
+
+Importante: si el bot está ejecutándose, primero debes detenerlo antes de actualizarlo. No elimines "session.db", ya que contiene la sesión de WhatsApp.
+
+Variables de entorno
+
+Variable| Valor predeterminado| Descripción
+"BOT_PHONE"| Pregunta al iniciar| Número de vinculación
+"BOT_PREFIX"| "!"| Prefijo de comandos
+"BOT_NAME"| "WaBot"| Nombre del bot
+"BOT_SESSION_DB"| "session.db"| Archivo de sesión
+"BOT_LOG_LEVEL"| "INFO"| Nivel de registros
+
+Ejemplo de configuración:
+
 BOT_PREFIX="." BOT_NAME="MiBot" ./wabot
-```
 
-## Comandos incluidos
+Comandos incluidos
 
-`!ping`, `!menu`, `!echo <texto>`, `!id`, `!grupo`
+Comando| Función
+"!ping"| Comprobar respuesta
+"!menu"| Mostrar menú
+"!echo <texto>"| Repetir mensaje
+"!id"| Mostrar identificador
+"!grupo"| Información del grupo
 
-## Agregar un comando
+Agregar nuevos comandos
 
-En `commands.go`, dentro de `registerCommands`:
+Abrir "commands.go" y agregar el siguiente código dentro de "registerCommands":
 
-```go
 b.Register(&Command{
-	Name:        "hola",
-	Description: "Saluda",
-	Run: func(c *Ctx) {
-		c.Reply("Hola!")
-	},
+    Name:        "hola",
+    Description: "Saluda",
+    Run: func(c *Ctx) {
+        c.Reply("¡Hola!")
+    },
 })
-```
 
-## Problemas comunes
+Después de modificar el código, volver a compilar:
 
-- **Error de CGO / gcc not found**: instala `clang` y exporta `CGO_ENABLED=1` y `CC=clang`.
-- **Sesión cerrada (`LoggedOut`)**: borra `session.db` y vuelve a vincular.
-- **El código no aparece o falla**: verifica el número con código de país y que tengas internet estable.
-- **Quitar el bot**: elimina el dispositivo desde WhatsApp > Dispositivos vinculados.
+go build -o wabot .
+
+Problemas comunes
+
+Error de CGO o GCC no encontrado
+
+pkg install clang
+
+export CGO_ENABLED=1
+
+export CC=clang
+
+Sesión cerrada ("LoggedOut")
+
+Será necesario volver a vincular el dispositivo. No elimines la sesión sin comprobar primero el motivo del error.
+
+El código de vinculación no aparece
+
+- Verificar el número con código de país.
+- Comprobar la conexión a Internet.
+- Revisar que WhatsApp permita vincular otro dispositivo.
+
+Eliminar el bot
+
+Puedes detenerlo y eliminar la carpeta del proyecto cuando ya no necesites sus archivos. Ten presente que perderás la sesión local si eliminas "session.db".
