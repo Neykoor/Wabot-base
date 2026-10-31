@@ -49,7 +49,7 @@ func pairWithCode(ctx context.Context, client *whatsmeow.Client, phone string, p
 	for attempt := 1; attempt <= 10; attempt++ {
 		if err := connectSafe(client); err != nil {
 			fmt.Println("Error conectando, reintentando:", err)
-			time.Sleep(5 * time.Second)
+			time.Sleep(20 * time.Second)
 			continue
 		}
 		time.Sleep(3 * time.Second)
@@ -61,9 +61,14 @@ func pairWithCode(ctx context.Context, client *whatsmeow.Client, phone string, p
 
 		code, err := client.PairPhone(ctx, phone, true, whatsmeow.PairClientChrome, "Chrome (Linux)")
 		if err != nil {
-			fmt.Println("Error generando código, reintentando:", err)
 			client.Disconnect()
-			time.Sleep(5 * time.Second)
+			if strings.Contains(err.Error(), "rate-overlimit") || strings.Contains(err.Error(), "429") {
+				fmt.Println("WhatsApp bloqueó temporalmente los códigos por demasiados intentos.")
+				fmt.Println("Espera 1 hora sin intentar de nuevo y vuelve a ejecutar ./wabot")
+				return false
+			}
+			fmt.Println("Error generando código, reintentando:", err)
+			time.Sleep(20 * time.Second)
 			continue
 		}
 
@@ -76,7 +81,7 @@ func pairWithCode(ctx context.Context, client *whatsmeow.Client, phone string, p
 			return true
 		case <-dropped:
 			fmt.Println("Se cortó la conexión antes de vincular, generando código nuevo...")
-			time.Sleep(3 * time.Second)
+			time.Sleep(30 * time.Second)
 		case <-time.After(150 * time.Second):
 			fmt.Println("El código expiró, generando uno nuevo...")
 			client.Disconnect()
