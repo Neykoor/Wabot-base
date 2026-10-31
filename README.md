@@ -1,28 +1,63 @@
-WaBot - Base de bot de WhatsApp en Go
+WaBot Base
 
-Bot de WhatsApp desarrollado en Go utilizando "whatsmeow" (https://github.com/tulir/whatsmeow). Incluye vinculación mediante código de emparejamiento, sin necesidad de QR.
+<p align="center">
+  **Base de bot de WhatsApp desarrollada en Go**
+  <br>
+  Ligera, sencilla y personalizable.
+</p><p align="center">
+  <img src="https://img.shields.io/badge/Language-Go-00ADD8?style=for-the-badge&logo=go" />
+  <img src="https://img.shields.io/badge/Platform-Termux-000000?style=for-the-badge&logo=terminal" />
+  <img src="https://img.shields.io/badge/Library-whatsmeow-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" />
+</p>---
 
-Estructura del proyecto
+✧ Sobre el proyecto
 
-Archivo| Función
-"main.go"| Conexión y vinculación por código
-"bot.go"| Eventos, comandos, Reply y Send
-"commands.go"| Comandos de ejemplo y registro
-"config.go"| Configuración mediante variables de entorno
-"go.mod"| Dependencias del proyecto
-"go.sum"| Versiones verificadas de dependencias
+WaBot Base es una plantilla de bot de WhatsApp creada en Go utilizando "whatsmeow" (https://github.com/tulir/whatsmeow).
 
-Instalación en Termux
+Su objetivo es proporcionar una base sencilla para desarrollar bots de WhatsApp, permitiendo agregar comandos, personalizar funciones y ampliar el proyecto sin depender de estructuras demasiado complejas.
 
-1. Preparar Termux
+La vinculación se realiza mediante código de emparejamiento, sin necesidad de escanear un código QR.
 
-Actualizar los paquetes:
+✧ Características
+
+- Desarrollado completamente en Go.
+- Conexión mediante whatsmeow.
+- Vinculación mediante código de emparejamiento.
+- Sistema de comandos personalizable.
+- Respuestas mediante "Reply" y "Send".
+- Configuración mediante variables de entorno.
+- Almacenamiento local de sesión.
+- Compatible con Termux.
+- Código organizado y fácil de modificar.
+
+✧ Estructura del proyecto
+
+Archivo| Descripción
+"main.go"| Inicio, conexión y vinculación
+"bot.go"| Eventos y administración de comandos
+"commands.go"| Registro y comandos de ejemplo
+"config.go"| Configuración del bot
+"go.mod"| Dependencias
+"go.sum"| Verificación de dependencias
+
+✧ Requisitos
+
+- Android con Termux o un entorno compatible con Go.
+- Conexión a Internet.
+- Go.
+- Git.
+- Clang y Make para compilaciones que necesiten CGO.
+
+✧ Instalación en Termux
+
+1. Actualizar paquetes
 
 pkg update
 
 pkg upgrade -y
 
-Instalar las herramientas necesarias:
+2. Instalar herramientas
 
 pkg install golang
 
@@ -34,111 +69,62 @@ pkg install make
 
 pkg install tmux
 
-2. Descargar el proyecto desde GitHub
-
-Ir al directorio principal:
+3. Descargar el repositorio
 
 cd ~
 
-Clonar el repositorio:
-
 git clone https://github.com/Neykoor/Wabot-base.git wabot
 
-Entrar en la carpeta:
+4. Entrar en el proyecto
 
 cd ~/wabot
 
-3. Preparar las dependencias
-
-Habilitar CGO:
+5. Configurar el entorno
 
 export CGO_ENABLED=1
 
-Configurar Clang:
-
 export CC=clang
 
-Descargar y organizar las dependencias:
+6. Instalar y organizar dependencias
 
 go mod tidy
 
-4. Compilar el bot
+7. Compilar
 
 go build -o wabot .
 
-5. Iniciar el bot
+8. Ejecutar
 
 ./wabot
 
-La primera vez solicitará el número de teléfono con código de país, sin espacios ni signo "+".
+✧ Vinculación de WhatsApp
+
+Al iniciar por primera vez, el bot solicitará un número telefónico con código de país.
 
 Ejemplo:
 
 521234567890
 
-Después aparecerá un código de emparejamiento de 8 caracteres.
+Después de introducir el número, aparecerá un código de emparejamiento.
 
-En WhatsApp:
+Para vincular:
 
-1. Abrir Dispositivos vinculados.
-2. Seleccionar Vincular dispositivo.
-3. Elegir Vincular con número de teléfono.
-4. Introducir el código mostrado en Termux.
+1. Abre WhatsApp.
+2. Entra en Dispositivos vinculados.
+3. Selecciona Vincular dispositivo.
+4. Elige Vincular con número de teléfono.
+5. Introduce el código proporcionado por WaBot.
 
-Al finalizar aparecerá el mensaje de vinculación correcta y se guardará la sesión en "session.db".
+Una vez completado el proceso, la sesión quedará almacenada en "session.db".
 
-Mantener el bot activo
+Importante: no compartas tu archivo de sesión, ya que contiene información sensible de tu conexión.
 
-Activar el bloqueo de suspensión:
+✧ Configuración
 
-termux-wake-lock
-
-Crear una sesión de TMUX:
-
-tmux new -s bot
-
-Iniciar el bot:
-
-cd ~/wabot
-
-./wabot
-
-Para salir sin cerrar el bot:
-
-"CTRL + B" y después "D".
-
-Para volver a la sesión:
-
-tmux attach -t bot
-
-Actualizar el bot desde GitHub
-
-Entrar en la carpeta:
-
-cd ~/wabot
-
-Descargar los últimos cambios:
-
-git pull
-
-Actualizar dependencias:
-
-go mod tidy
-
-Compilar nuevamente:
-
-go build -o wabot .
-
-Iniciar el bot:
-
-./wabot
-
-Importante: si el bot está ejecutándose, primero debes detenerlo antes de actualizarlo. No elimines "session.db", ya que contiene la sesión de WhatsApp.
-
-Variables de entorno
+WaBot permite modificar su comportamiento mediante variables de entorno.
 
 Variable| Valor predeterminado| Descripción
-"BOT_PHONE"| Pregunta al iniciar| Número de vinculación
+"BOT_PHONE"| Vacío| Número para vincular
 "BOT_PREFIX"| "!"| Prefijo de comandos
 "BOT_NAME"| "WaBot"| Nombre del bot
 "BOT_SESSION_DB"| "session.db"| Archivo de sesión
@@ -148,18 +134,20 @@ Ejemplo de configuración:
 
 BOT_PREFIX="." BOT_NAME="MiBot" ./wabot
 
-Comandos incluidos
+✧ Comandos disponibles
 
-Comando| Función
-"!ping"| Comprobar respuesta
-"!menu"| Mostrar menú
-"!echo <texto>"| Repetir mensaje
-"!id"| Mostrar identificador
-"!grupo"| Información del grupo
+Comando| Descripción
+"!ping"| Comprueba la respuesta del bot
+"!menu"| Muestra el menú
+"!echo <texto>"| Repite un mensaje
+"!id"| Muestra el identificador
+"!grupo"| Muestra información del grupo
 
-Agregar nuevos comandos
+✧ Crear nuevos comandos
 
-Abrir "commands.go" y agregar el siguiente código dentro de "registerCommands":
+Los comandos se registran en "commands.go".
+
+Ejemplo:
 
 b.Register(&Command{
     Name:        "hola",
@@ -169,30 +157,110 @@ b.Register(&Command{
     },
 })
 
-Después de modificar el código, volver a compilar:
+Después de modificar el código, vuelve a compilar:
 
 go build -o wabot .
 
-Problemas comunes
+✧ Actualizar el bot
 
-Error de CGO o GCC no encontrado
+Para obtener los últimos cambios del repositorio:
 
-pkg install clang
+1. Entrar en el proyecto
+
+cd ~/wabot
+
+2. Descargar actualizaciones
+
+git pull
+
+3. Actualizar dependencias
+
+go mod tidy
+
+4. Compilar nuevamente
+
+go build -o wabot .
+
+5. Iniciar
+
+./wabot
+
+Si el bot está ejecutándose, detenlo antes de actualizarlo.
+
+No elimines "session.db" durante las actualizaciones.
+
+✧ Ejecutar en segundo plano
+
+Puedes utilizar TMUX para mantener el proceso activo mientras utilizas otras terminales.
+
+Activar bloqueo de suspensión:
+
+termux-wake-lock
+
+Crear una sesión:
+
+tmux new -s bot
+
+Entrar al proyecto:
+
+cd ~/wabot
+
+Ejecutar:
+
+./wabot
+
+Para salir sin detener el proceso:
+
+"CTRL + B" y después "D".
+
+Para regresar:
+
+tmux attach -t bot
+
+✧ Solución de problemas
+
+Error de CGO o compilador
+
+Comprueba que Clang esté instalado y configura:
 
 export CGO_ENABLED=1
 
 export CC=clang
 
-Sesión cerrada ("LoggedOut")
+Error al descargar dependencias
 
-Será necesario volver a vincular el dispositivo. No elimines la sesión sin comprobar primero el motivo del error.
+go mod tidy
 
-El código de vinculación no aparece
+El ejecutable no existe
 
-- Verificar el número con código de país.
-- Comprobar la conexión a Internet.
-- Revisar que WhatsApp permita vincular otro dispositivo.
+Vuelve a compilar:
 
-Eliminar el bot
+go build -o wabot .
 
-Puedes detenerlo y eliminar la carpeta del proyecto cuando ya no necesites sus archivos. Ten presente que perderás la sesión local si eliminas "session.db".
+Sesión desconectada
+
+Comprueba el estado de la conexión y el registro de errores. Si WhatsApp cerró la sesión, será necesario realizar una nueva vinculación.
+
+---
+
+✧ Contribuciones
+
+Las contribuciones, sugerencias y reportes de errores son bienvenidos.
+
+Si deseas mejorar el proyecto, puedes crear un Fork y enviar un Pull Request.
+
+✧ Autor
+
+Neykoor
+
+GitHub: "@Neykoor" (https://github.com/Neykoor)
+
+Repositorio: "Neykoor/Wabot-base" (https://github.com/Neykoor/Wabot-base)
+
+---
+
+<p align="center">
+  Hecho con Go y dedicación.
+  <br>
+  **WaBot Base**
+</p>
