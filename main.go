@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -14,6 +15,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/store/sqlstore"
+	"go.mau.fi/whatsmeow/types/events"
 	waLog "go.mau.fi/whatsmeow/util/log"
 )
 
@@ -35,6 +37,55 @@ func askPhone() string {
 	}
 }
 
+func connectSafe(client *whatsmeow.Client) error {
+	err := client.Connect()
+	if err != nil && !errors.Is(err, whatsmeow.ErrAlreadyConnected) {
+		return err
+	}
+	return nil
+}
+
+func pairWithCode(ctx context.Context, client *whatsmeow.Client, phone string, paired, dropped chan struct{}) bool {
+	for attempt := 1; attempt <= 10; attempt++ {
+		if err := connectSafe(client); err != nil {
+			fmt.Println("Error conectando, reintentando:", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		time.Sleep(3 * time.Second)
+
+		select {
+		case <-dropped:
+		default:
+		}
+
+		code, err := client.PairPhone(ctx, phone, true, whatsmeow.PairClientChrome, "Chrome (Linux)")
+		if err != nil {
+			fmt.Println("Error generando código, reintentando:", err)
+			client.Disconnect()
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		fmt.Println("Código de vinculación:", code)
+		fmt.Println("WhatsApp > Dispositivos vinculados > Vincular con el número de teléfono")
+		fmt.Println("Tienes unos 2 minutos. Si se corta la conexión se genera un código nuevo solo.")
+
+		select {
+		case <-paired:
+			return true
+		case <-dropped:
+			fmt.Println("Se cortó la conexión antes de vincular, generando código nuevo...")
+			time.Sleep(3 * time.Second)
+		case <-time.After(150 * time.Second):
+			fmt.Println("El código expiró, generando uno nuevo...")
+			client.Disconnect()
+			time.Sleep(2 * time.Second)
+		}
+	}
+	return false
+}
+
 func main() {
 	ctx := context.Background()
 	cfg := LoadConfig()
@@ -54,18 +105,29 @@ func main() {
 	bot := NewBot(client, cfg)
 	client.AddEventHandler(bot.HandleEvent)
 
+	paired := make(chan struct{}, 1)
+	dropped := make(chan struct{}, 1)
+	client.AddEventHandler(func(evt interface{}) {
+		switch evt.(type) {
+		case *events.PairSuccess:
+			select {
+			case paired <- struct{}{}:
+			default:
+			}
+		case *events.Disconnected:
+			select {
+			case dropped <- struct{}{}:
+			default:
+			}
+		}
+	})
+
 	if client.Store.ID == nil {
-		if err := client.Connect(); err != nil {
-			panic(err)
-		}
 		phone := askPhone()
-		time.Sleep(3 * time.Second)
-		code, err := client.PairPhone(ctx, phone, true, whatsmeow.PairClientChrome, "Chrome (Linux)")
-		if err != nil {
-			panic(err)
+		if !pairWithCode(ctx, client, phone, paired, dropped) {
+			fmt.Println("No se pudo vincular. Revisa tu conexión y vuelve a intentarlo.")
+			return
 		}
-		fmt.Println("Código de vinculación:", code)
-		fmt.Println("WhatsApp > Dispositivos vinculados > Vincular con el número de teléfono")
 	} else {
 		if err := client.Connect(); err != nil {
 			panic(err)
